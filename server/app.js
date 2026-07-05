@@ -4,12 +4,15 @@ const helmet = require('helmet')
 require('dotenv').config()
 
 const pool = require('./src/config/db')
+const authRoutes = require('./src/routes/auth.routes')
 
 const app = express()
 
 app.use(helmet())
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
 app.use(express.json())
+
+app.use('/api/auth', authRoutes)
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'PaisaTrack server is running 🚀' })
