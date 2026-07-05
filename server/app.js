@@ -5,6 +5,7 @@ require('dotenv').config()
 
 const pool = require('./src/config/db')
 const authRoutes = require('./src/routes/auth.routes')
+const expenseRoutes = require('./src/routes/expense.routes')
 
 const app = express()
 
@@ -13,6 +14,7 @@ app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
 app.use(express.json())
 
 app.use('/api/auth', authRoutes)
+app.use('/api/expenses', expenseRoutes)
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'PaisaTrack server is running 🚀' })
