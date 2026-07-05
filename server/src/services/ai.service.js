@@ -3,9 +3,7 @@ const pool = require('../config/db')
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-// ============================================
 // MOCK PARSER — used as fallback
-// ============================================
 const mockParseExpense = (rawInput) => {
   const input = rawInput.toLowerCase()
   const amountMatch = input.match(/\d+/)
@@ -39,9 +37,23 @@ const mockParseExpense = (rawInput) => {
   }
 }
 
-// ============================================
+const mockGenerateSummary = (expenseData) => {
+  const { totalAmount, categories } = expenseData
+
+  if (!categories || categories.length === 0) {
+    return 'No expenses recorded this month yet. Start adding your expenses!'
+  }
+
+  const biggest = categories.reduce((max, cat) =>
+    cat.amount > max.amount ? cat : max, categories[0]
+  )
+
+  const percentage = Math.round((biggest.amount / totalAmount) * 100)
+
+  return `Your biggest expense this month was ${biggest.category} at ₹${biggest.amount}, which accounts for ${percentage}% of your total spending of ₹${totalAmount}. You have logged expenses across ${categories.length} categories this month. Consider reviewing your ${biggest.category} expenses to see if there are areas where you can save.`
+}
+
 // REAL CLAUDE PARSER
-// ============================================
 const realParseExpense = async (rawInput, categories) => {
   const message = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
@@ -78,9 +90,7 @@ Rules:
   return { ...parsed, source: 'claude' }
 }
 
-// ============================================
 // MAIN EXPORTED FUNCTION
-// ============================================
 const parseExpense = async (rawInput, categories = []) => {
   // Try real Claude first — fall back to mock if it fails
   if (process.env.ANTHROPIC_API_KEY) {
@@ -99,9 +109,7 @@ const parseExpense = async (rawInput, categories = []) => {
   return mockParseExpense(rawInput)
 }
 
-// ============================================
 // MONTHLY SUMMARY GENERATOR
-// ============================================
 const generateMonthlySummary = async (expenseData) => {
   // If no API key or no credits, use mock summary
   if (!process.env.ANTHROPIC_API_KEY) {
