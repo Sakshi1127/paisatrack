@@ -73,3 +73,17 @@ Backend — Railway or Render
 Frontend — Vercel
 Database — Supabase or Railway PostgreSQL
 Environment variables configured on hosting platform
+
+user1
+{
+  "name": "Sakshi",
+  "email": "sakshi@test.com",
+  "password": "sakshi123"
+}
+
+{
+    "name":"Punit",
+    "email":"punit@gmail.com",
+    "password":"punit123"
+
+}
