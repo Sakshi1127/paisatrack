@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '../context/AuthContext'
 import { getExpenses, deleteExpense } from '../api/expenses'
 import { getTodayTotal, getMonthlySummary } from '../api/analytics'
 import type{ Expense, ParsedExpense } from '../types'
@@ -161,14 +160,14 @@ const Home = () => {
 
   if (loading) return (
     <div className="flex items-center justify-center h-full">
-      <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+      <div className="w-12 h-12 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
   const grouped = groupByDate(expenses)
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
+    <div className="min-h-screen flex flex-col overflow-x-hidden bg-gray-50">
 
       {/* Top bar */}
       <div className="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100 flex-shrink-0">
@@ -195,8 +194,8 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Body — fixed height, no page scroll */}
-      <div className="flex-1 overflow-hidden p-6 flex flex-col gap-5">
+      {/* Body */}
+      <div className="flex-1 p-6 flex flex-col gap-5">
 
         {/* Stat cards */}
         <div className="grid grid-cols-3 gap-5 flex-shrink-0">
