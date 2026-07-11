@@ -1,11 +1,9 @@
-import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import logo from '../assets/logo.png'
 
 const Sidebar = () => {
   const { user, logout } = useAuth()
-  const [mobileOpen, setMobileOpen] = useState(false)
 
   const navItems = [
     { path: '/', label: 'Home', icon: '🏠' },

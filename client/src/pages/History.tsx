@@ -33,6 +33,7 @@ const History = () => {
       setExpenses(expensesData.expenses)
     } catch (err) {
       console.error('Failed to fetch:', err)
+      setError(true)
     } finally {
       setLoading(false)
     }
