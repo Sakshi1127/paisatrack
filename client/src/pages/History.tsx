@@ -66,10 +66,9 @@ const History = () => {
   const totalDiff = comparison?.difference || 0
 
   return (
-<div className="min-h-screen h-screen flex flex-col overflow-auto bg-gray-50">
-      {/* Header */}
-      <div className="px-8 py-4 bg-white border-b border-gray-100 flex-shrink-0">
-        <div className="flex items-center justify-between">
+<div className="min-h-screen flex flex-col bg-gray-50">      {/* Header */}
+     <div className="px-4 lg:px-8 py-4 bg-white border-b border-gray-100 flex-shrink-0">
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
               History
@@ -120,12 +119,11 @@ const History = () => {
       ) : error ? (
   <ErrorState message="Failed to load history" onRetry={fetchData} />
 )       : (
-        <div className="flex-1 overflow-auto p-5">
-          <div className="grid grid-cols-3 gap-5 h-full min-h-0">
+       <div className="p-4 lg:p-5">
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
             {/* Left — Donut chart */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col min-h-0">
-              <div className="flex items-center gap-2 mb-4 flex-shrink-0">
+<div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col">              <div className="flex items-center gap-2 mb-4 flex-shrink-0">
                 <div className="w-2 h-5 bg-gradient-to-b from-green-400 to-teal-500 rounded-full" />
                 <h2 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
                   {MONTHS[month - 1]} Breakdown
@@ -141,8 +139,7 @@ const History = () => {
                   </p>
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col min-h-0">
-                  <div className="relative flex justify-center flex-shrink-0">
+<div className="flex flex-col">                  <div className="relative flex justify-center flex-shrink-0">
                     <ResponsiveContainer width={200} height={200}>
                       <PieChart>
                         <Pie
@@ -173,8 +170,7 @@ const History = () => {
                   </div>
 
                   {/* Legend */}
-                  <div className="flex-1 overflow-y-auto space-y-2 mt-3">
-                    {chartData.map((cat: any, i: number) => (
+<div className="space-y-2 mt-3 max-h-64 lg:max-h-none overflow-y-auto">                    {chartData.map((cat: any, i: number) => (
                       <div key={i}>
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-1.5">
@@ -208,8 +204,7 @@ const History = () => {
             </div>
 
             {/* Middle — Month comparison */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col min-h-0 overflow-hidden">
-              <div className="px-5 py-4 border-b border-gray-50 flex-shrink-0">
+<div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden">              <div className="px-5 py-4 border-b border-gray-50 flex-shrink-0">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-2 h-5 bg-gradient-to-b from-purple-400 to-indigo-500 rounded-full" />
                   <h2 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
@@ -243,8 +238,7 @@ const History = () => {
               </div>
 
               {/* Per category comparison */}
-              <div className="flex-1 overflow-y-auto p-4">
-                {!comparison?.comparison?.length ? (
+<div className="overflow-y-auto max-h-96 lg:max-h-none p-4">                {!comparison?.comparison?.length ? (
                   <div className="flex flex-col items-center justify-center h-full">
                     <p className="text-gray-400 text-sm text-center">
                       No previous month data to compare
@@ -335,8 +329,7 @@ const History = () => {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto">
-                {expenses.length === 0 ? (
+<div className="overflow-y-auto max-h-96 lg:max-h-none">                {expenses.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full">
                     <p className="text-3xl mb-2">📭</p>
                     <p className="text-gray-400 text-sm">No expenses this month</p>

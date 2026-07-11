@@ -20,7 +20,7 @@ const App = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/this-month" element={<ThisMonth />} />

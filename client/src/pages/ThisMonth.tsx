@@ -86,8 +86,7 @@ if (error) return <ErrorState message="Failed to load monthly data" onRetry={fet
   const unusedCats = allCats.filter(c => !usedCats.includes(c))
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
-
+<div className="min-h-screen flex flex-col bg-gray-50">
       {/* ── Header ── */}
       <div className="px-8 py-4 bg-white border-b border-gray-100 flex-shrink-0">
         <div className="flex items-center justify-between">
@@ -112,11 +111,9 @@ if (error) return <ErrorState message="Failed to load monthly data" onRetry={fet
       </div>
 
       {/* ── Body ── */}
-      <div className="flex-1 overflow-hidden p-5 flex flex-col gap-4">
-
+<div className="p-4 lg:p-5 flex flex-col gap-4">
         {/* TOP ROW — 4 stat cards */}
-        <div className="grid grid-cols-4 gap-4 flex-shrink-0">
-
+<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
           {/* Biggest purchase */}
           <div className="bg-white rounded-2xl border border-orange-100 p-4 flex items-center gap-3"
             style={{ background: 'linear-gradient(135deg, #fff7ed, #ffffff)' }}>
@@ -187,11 +184,9 @@ if (error) return <ErrorState message="Failed to load monthly data" onRetry={fet
         </div>
 
         {/* BOTTOM ROW — 3 columns */}
-        <div className="grid grid-cols-3 gap-4 flex-1 min-h-0">
-
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left — Donut chart only */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col min-h-0">
-            <div className="flex items-center gap-2 mb-4 flex-shrink-0">
+<div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col">            <div className="flex items-center gap-2 mb-4 flex-shrink-0">
               <div className="w-2 h-5 bg-gradient-to-b from-green-400 to-teal-500 rounded-full" />
               <h2 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
                 Breakdown
@@ -236,8 +231,7 @@ if (error) return <ErrorState message="Failed to load monthly data" onRetry={fet
                 </div>
 
                 {/* Legend — scrollable */}
-                <div className="flex-1 overflow-y-auto space-y-2 mt-3">
-                  {chartData.map((cat: any, i: number) => (
+<div className="space-y-2 mt-3">                  {chartData.map((cat: any, i: number) => (
                     <div key={i}>
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-1.5">
@@ -271,8 +265,7 @@ if (error) return <ErrorState message="Failed to load monthly data" onRetry={fet
           </div>
 
           {/* Middle — Daily pattern + AI Summary */}
-          <div className="flex flex-col gap-4 min-h-0">
-
+<div className="flex flex-col gap-4">
             {/* Bar chart */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex-1 min-h-0">
               <div className="flex items-center justify-between mb-3 flex-shrink-0">
@@ -415,8 +408,7 @@ if (error) return <ErrorState message="Failed to load monthly data" onRetry={fet
             </div>
 
             {/* Insights */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex-1 min-h-0 overflow-y-auto">
-              <div className="flex items-center gap-2 mb-4">
+<div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">              <div className="flex items-center gap-2 mb-4">
                 <div className="w-2 h-5 bg-gradient-to-b from-purple-400 to-pink-500 rounded-full" />
                 <h2 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
                   Insights

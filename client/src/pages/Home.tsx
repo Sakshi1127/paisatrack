@@ -312,13 +312,12 @@ if (error) return <ErrorState message="Failed to load expenses" onRetry={fetchDa
     <div className="min-h-screen flex flex-col overflow-x-hidden bg-gray-50">
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-100 flex-shrink-0">
-        <div>
+<div className="flex flex-col lg:flex-row lg:items-center justify-between px-4 lg:px-8 py-4 bg-white border-b border-gray-100 flex-shrink-0 gap-3">        <div>
           <h1 className="text-xl font-bold text-gray-900">{getGreeting()}</h1>
           <p className="text-sm text-gray-400">{today}</p>
         </div>
-        <div className="w-[440px] relative">
-          <div className="flex items-center gap-3 bg-gray-50 border-2 border-gray-200 hover:border-green-300 focus-within:border-green-500 focus-within:bg-white rounded-2xl px-4 py-3 transition-all shadow-sm">
+<div className="w-full lg:w-[440px] relative">
+            <div className="flex items-center gap-3 bg-gray-50 border-2 border-gray-200 hover:border-green-300 focus-within:border-green-500 focus-within:bg-white rounded-2xl px-4 py-3 transition-all shadow-sm">
             <div className="w-7 h-7 bg-gradient-to-br from-green-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white text-sm">✨</span>
             </div>
@@ -337,11 +336,9 @@ if (error) return <ErrorState message="Failed to load expenses" onRetry={fetchDa
       </div>
 
       {/* Body */}
-      <div className="flex-1 p-6 flex flex-col gap-5">
-
+<div className="flex-1 p-4 lg:p-6 flex flex-col gap-4 lg:gap-5">
         {/* Stat cards */}
-        <div className="grid grid-cols-3 gap-5 flex-shrink-0">
-          <StatCard
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-shrink-0">          <StatCard
             title="Spent this month"
             value={`₹${monthTotal.toLocaleString('en-IN')}`}
             subtitle={`${monthCount} expenses logged`}
@@ -362,10 +359,9 @@ if (error) return <ErrorState message="Failed to load expenses" onRetry={fetchDa
         </div>
 
         {/* Bottom two columns */}
-        <div className="grid grid-cols-3 gap-5 flex-1 min-h-0">
-
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Recent Activity */}
-          <div className="col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden">
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50 flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-6 bg-gradient-to-b from-green-400 to-teal-500 rounded-full" />
