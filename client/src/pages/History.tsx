@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { getMonthlySummary, compareMonths } from '../api/analytics'
 import { getExpenses } from '../api/expenses'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+import LoadingSpinner from '../components/LoadingSpinner'
+import ErrorState from '../components/ErrorState'
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -16,6 +18,7 @@ const History = () => {
   const [comparison, setComparison] = useState<any>(null)
   const [expenses, setExpenses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   const fetchData = async () => {
     setLoading(true)
@@ -114,10 +117,10 @@ const History = () => {
 
       {/* Body */}
       {loading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : (
+       <LoadingSpinner message="Loading history..." />
+      ) : error ? (
+  <ErrorState message="Failed to load history" onRetry={fetchData} />
+)       : (
         <div className="flex-1 overflow-hidden p-5">
           <div className="grid grid-cols-3 gap-5 h-full min-h-0">
 

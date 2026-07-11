@@ -10,15 +10,17 @@ const App = () => {
   const { isAuthenticated } = useAuth()
 
   if (!isAuthenticated) {
-    return <Routes>
-      <Route path="*" element={<Login />} />
-    </Routes>
+    return (
+      <Routes>
+        <Route path="*" element={<Login />} />
+      </Routes>
+    )
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-auto">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/this-month" element={<ThisMonth />} />

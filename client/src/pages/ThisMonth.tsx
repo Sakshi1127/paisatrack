@@ -5,11 +5,14 @@ import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts'
+import LoadingSpinner from '../components/LoadingSpinner'
+import ErrorState from '../components/ErrorState'
 
 const ThisMonth = () => {
   const [summary, setSummary] = useState<any>(null)
   const [expenses, setExpenses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   const now = new Date()
   const monthName = now.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
@@ -24,6 +27,7 @@ const ThisMonth = () => {
       setExpenses(expensesData.expenses)
     } catch (err) {
       console.error('Failed to fetch:', err)
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -31,11 +35,8 @@ const ThisMonth = () => {
 
   useEffect(() => { fetchData() }, [])
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-full">
-      <div className="w-12 h-12 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
-    </div>
-  )
+ if (loading) return <LoadingSpinner message="Loading this month's data..." />
+if (error) return <ErrorState message="Failed to load monthly data" onRetry={fetchData} />
 
   // Pie chart data
   const chartData = summary?.categories?.map((cat: any) => ({

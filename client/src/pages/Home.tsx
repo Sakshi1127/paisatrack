@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { getExpenses, deleteExpense } from '../api/expenses'
+import { getExpenses, deleteExpense, updateExpense } from '../api/expenses'
 import { getTodayTotal, getMonthlySummary } from '../api/analytics'
-import type{ Expense, ParsedExpense } from '../types'
+import type { Expense, ParsedExpense } from '../types'
 import ExpenseInput from '../components/ExpenseInput'
 import ConfirmCard from '../components/ConfirmCard'
 import StatCard from '../components/StatCard'
+import LoadingSpinner from '../components/LoadingSpinner'
+import ErrorState from '../components/ErrorState'
 
 const formatDateLabel = (dateStr: string) => {
   const today = new Date().toISOString().split('T')[0]
@@ -28,6 +30,107 @@ const groupByDate = (expenses: Expense[]) => {
   return groups
 }
 
+// ── Inline Edit Row ──────────────────────────────────────────
+const InlineEditRow = ({
+  expense,
+  onSaved,
+  onCancel,
+}: {
+  expense: Expense
+  onSaved: () => void
+  onCancel: () => void
+}) => {
+  const [item, setItem] = useState(expense.item)
+  const [amount, setAmount] = useState(expense.amount.toString())
+  const [category, setCategory] = useState(expense.category)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSave = async () => {
+    try {
+      setError('')
+      setSaving(true)
+      if (!item || !amount || !category) {
+        setError('All fields are required')
+        return
+      }
+      if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+        setError('Amount must be positive')
+        return
+      }
+      await updateExpense(expense.id, {
+        item,
+        amount: parseFloat(amount),
+        category_name: category,
+        date: expense.date,
+      })
+      onSaved()
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to update')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div
+      className="px-4 py-3 border-l-4"
+      style={{ borderLeftColor: expense.category_color || '#51CF66' }}
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <input
+          value={item}
+          onChange={e => setItem(e.target.value)}
+          className="flex-1 text-sm font-medium text-gray-900 border-b-2 border-green-400 focus:outline-none bg-transparent py-1"
+          placeholder="Item name"
+          autoFocus
+        />
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <span className="text-gray-400 text-sm">₹</span>
+          <input
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+            className="w-20 text-sm font-bold text-gray-900 border-b-2 border-green-400 focus:outline-none bg-transparent py-1 text-right"
+            type="number"
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 mb-2">
+        <span
+          className="w-2 h-2 rounded-full flex-shrink-0"
+          style={{ backgroundColor: expense.category_color || '#51CF66' }}
+        />
+        <input
+          value={category}
+          onChange={e => setCategory(e.target.value)}
+          className="text-xs font-medium text-gray-600 border-b border-gray-300 focus:outline-none bg-transparent py-0.5 flex-1"
+          placeholder="Category"
+        />
+      </div>
+
+      {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
+
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
+        >
+          {saving ? 'Saving...' : '✓ Save'}
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-lg transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── CollapsibleDay ────────────────────────────────────────────
 const CollapsibleDay = ({
   date, expenses, onDeleted,
 }: {
@@ -37,6 +140,7 @@ const CollapsibleDay = ({
 }) => {
   const [open, setOpen] = useState(date === new Date().toISOString().split('T')[0])
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const dayTotal = expenses.reduce((s, e) => s + Number(e.amount), 0)
 
   const handleDelete = async (id: number) => {
@@ -53,54 +157,92 @@ const CollapsibleDay = ({
         className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-colors hover:bg-white/60"
       >
         <div className="flex items-center gap-2">
-          <span className={`text-gray-400 text-xs transition-transform duration-200 ${open ? 'rotate-90' : ''}`}>▶</span>
+          <span className={`text-gray-400 text-xs transition-transform duration-200 ${open ? 'rotate-90' : ''}`}>
+            ▶
+          </span>
           <span className="text-sm font-semibold text-gray-700">{formatDateLabel(date)}</span>
           <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
             {expenses.length}
           </span>
         </div>
-        <span className="text-sm font-bold text-gray-700">₹{dayTotal.toLocaleString('en-IN')}</span>
+        <span className="text-sm font-bold text-gray-700">
+          ₹{dayTotal.toLocaleString('en-IN')}
+        </span>
       </button>
 
       {open && (
         <div className="mx-1 rounded-xl overflow-hidden">
           {expenses.map((expense, i) => (
-            <div
-              key={expense.id}
-              className={`flex items-center justify-between px-4 py-3 group transition-colors hover:bg-white/80 ${
-                i !== expenses.length - 1 ? 'border-b border-gray-100' : ''
-              }`}
-              style={{
-                background: `linear-gradient(135deg, ${expense.category_color || '#868E96'}08, transparent)`
-              }}
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 mb-1">{expense.item}</p>
-                <div className="flex items-center gap-2">
-                  <span
-                    className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                    style={{
-                      backgroundColor: `${expense.category_color || '#868E96'}20`,
-                      color: expense.category_color || '#868E96',
-                      border: `1px solid ${expense.category_color || '#868E96'}40`,
-                    }}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: expense.category_color || '#868E96' }} />
-                    {expense.category}
-                  </span>
-                  <span className="text-xs text-gray-400">{formatTime(expense.created_at)}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 ml-3">
-                <span className="text-sm font-bold text-gray-900">₹{Number(expense.amount).toLocaleString('en-IN')}</span>
-                <button
-                  onClick={() => handleDelete(expense.id)}
-                  disabled={deletingId === expense.id}
-                  className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-full bg-red-50 text-red-400 hover:bg-red-500 hover:text-white transition-all text-xs"
+            <div key={expense.id}>
+              {editingId === expense.id ? (
+                <InlineEditRow
+                  expense={expense}
+                  onSaved={() => { setEditingId(null); onDeleted() }}
+                  onCancel={() => setEditingId(null)}
+                />
+              ) : (
+                <div
+                  className={`flex items-center justify-between px-4 py-3 group transition-colors hover:bg-white/80 ${
+                    i !== expenses.length - 1 ? 'border-b border-gray-100' : ''
+                  }`}
+                  style={{
+                    background: `linear-gradient(135deg, ${expense.category_color || '#868E96'}08, transparent)`
+                  }}
                 >
-                  {deletingId === expense.id ? '…' : '✕'}
-                </button>
-              </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 mb-1">{expense.item}</p>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                        style={{
+                          backgroundColor: `${expense.category_color || '#868E96'}20`,
+                          color: expense.category_color || '#868E96',
+                          border: `1px solid ${expense.category_color || '#868E96'}40`,
+                        }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: expense.category_color || '#868E96' }}
+                        />
+                        {expense.category}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {formatTime(expense.created_at)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 ml-3">
+                    <span className="text-sm font-bold text-gray-900">
+                      ₹{Number(expense.amount).toLocaleString('en-IN')}
+                    </span>
+
+                    {/* Pencil edit button */}
+                    <button
+                      onClick={e => {
+                        e.stopPropagation()
+                        setEditingId(expense.id)
+                      }}
+                      className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-full bg-blue-50 text-blue-400 hover:bg-blue-500 hover:text-white transition-all text-xs"
+                      title="Edit"
+                    >
+                      ✎
+                    </button>
+
+                    {/* Delete button */}
+                    <button
+                      onClick={e => {
+                        e.stopPropagation()
+                        handleDelete(expense.id)
+                      }}
+                      disabled={deletingId === expense.id}
+                      className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-full bg-red-50 text-red-400 hover:bg-red-500 hover:text-white transition-all text-xs"
+                    >
+                      {deletingId === expense.id ? '…' : '✕'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -109,6 +251,7 @@ const CollapsibleDay = ({
   )
 }
 
+// ── Home ──────────────────────────────────────────────────────
 const Home = () => {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [parsed, setParsed] = useState<ParsedExpense | null>(null)
@@ -119,7 +262,8 @@ const Home = () => {
   const [topCategoryAmount, setTopCategoryAmount] = useState(0)
   const [categories, setCategories] = useState<any[]>([])
   const [summary, setSummary] = useState('')
-  const [loading, setLoading] = useState(true)
+const [loading, setLoading] = useState(true)
+const [error, setError] = useState(false)
 
   const fetchData = async () => {
     try {
@@ -140,6 +284,7 @@ const Home = () => {
       }
     } catch (err) {
       console.error('Failed to fetch data:', err)
+       setError(true)
     } finally {
       setLoading(false)
     }
@@ -158,11 +303,8 @@ const Home = () => {
     weekday: 'long', day: 'numeric', month: 'short',
   })
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-full">
-      <div className="w-12 h-12 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
-    </div>
-  )
+  if (loading) return <LoadingSpinner message="Loading your expenses..." />
+if (error) return <ErrorState message="Failed to load expenses" onRetry={fetchData} />
 
   const grouped = groupByDate(expenses)
 
@@ -219,10 +361,10 @@ const Home = () => {
           />
         </div>
 
-        {/* Bottom two columns — fill remaining height */}
+        {/* Bottom two columns */}
         <div className="grid grid-cols-3 gap-5 flex-1 min-h-0">
 
-          {/* Recent Activity — scrolls inside */}
+          {/* Recent Activity */}
           <div className="col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50 flex-shrink-0">
               <div className="flex items-center gap-3">
@@ -263,7 +405,6 @@ const Home = () => {
                 <div className="w-2 h-6 bg-gradient-to-b from-purple-400 to-indigo-500 rounded-full" />
                 <h2 className="text-sm font-bold text-gray-800">Where It's Going</h2>
               </div>
-
               <div className="flex-1 overflow-y-auto p-5">
                 {categories.length === 0 ? (
                   <p className="text-gray-400 text-sm text-center py-4">No data yet</p>
@@ -273,10 +414,7 @@ const Home = () => {
                       <div key={cat.category}>
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-2">
-                            <span
-                              className="w-2.5 h-2.5 rounded-full"
-                              style={{ backgroundColor: cat.color }}
-                            />
+                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
                             <span className="text-sm font-medium text-gray-700">{cat.category}</span>
                           </div>
                           <div className="flex items-center gap-2">
@@ -285,10 +423,7 @@ const Home = () => {
                             </span>
                             <span
                               className="text-xs font-semibold px-1.5 py-0.5 rounded-md"
-                              style={{
-                                backgroundColor: `${cat.color}20`,
-                                color: cat.color
-                              }}
+                              style={{ backgroundColor: `${cat.color}20`, color: cat.color }}
                             >
                               {cat.percentage}%
                             </span>
