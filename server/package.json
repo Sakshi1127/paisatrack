@@ -4,16 +4,17 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-     "start": "node app.js",
-  "dev": "nodemon app.js",
-  "migrate": "node src/db/migrations.js",
-  "seed": "node src/db/seed.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "migrate": "node src/db/migrations.js",
+    "seed": "node src/db/seed.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.37.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

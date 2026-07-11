@@ -1,7 +1,16 @@
-const Anthropic = require('@anthropic-ai/sdk')
+let Anthropic
+
+try {
+  Anthropic = require('@anthropic-ai/sdk')
+} catch (error) {
+  console.warn('Anthropic SDK unavailable, using mock parsing and summaries.', error.message)
+}
+
 const pool = require('../config/db')
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const client = Anthropic && process.env.ANTHROPIC_API_KEY
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null
 
 // MOCK PARSER — used as fallback
 const mockParseExpense = (rawInput) => {
@@ -55,6 +64,10 @@ const mockGenerateSummary = (expenseData) => {
 
 // REAL CLAUDE PARSER
 const realParseExpense = async (rawInput, categories) => {
+  if (!client) {
+    throw new Error('Anthropic client unavailable')
+  }
+
   const message = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 200,
@@ -111,8 +124,8 @@ const parseExpense = async (rawInput, categories = []) => {
 
 // MONTHLY SUMMARY GENERATOR
 const generateMonthlySummary = async (expenseData) => {
-  // If no API key or no credits, use mock summary
-  if (!process.env.ANTHROPIC_API_KEY) {
+  // If no API key, SDK, or credits, use mock summary
+  if (!process.env.ANTHROPIC_API_KEY || !client) {
     return mockGenerateSummary(expenseData)
   }
 

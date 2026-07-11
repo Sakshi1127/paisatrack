@@ -39,7 +39,7 @@ const parseExpenseInput = async (req, res) =>{
 
 const createExpense = async (req, res) =>{
     try{
-        const {raw_input, item , amount , category_name, date} = req.body
+        const {raw_input, item , amount , category_name, date,color} = req.body
         const userId = req.user.id
 
         if(!item || !amount || !category_name){
@@ -57,9 +57,17 @@ const createExpense = async (req, res) =>{
 
         let categoryId = null
 
-        if(categoryResult.rows.length > 0){
-            categoryId = categoryResult.rows[0].id
-        }else{
+       if (categoryResult.rows.length > 0) {
+  categoryId = categoryResult.rows[0].id
+
+  // Update color if user picked one
+  if (color) {
+    await pool.query(
+      `UPDATE categories SET color = $1 WHERE id = $2`,
+      [color, categoryId]
+    )
+  }
+}else{
             const newCategory = await pool.query(
         `INSERT INTO categories (name, color, user_id)
          VALUES ($1, $2, $3)

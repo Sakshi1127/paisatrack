@@ -66,8 +66,7 @@ const History = () => {
   const totalDiff = comparison?.difference || 0
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
-
+<div className="min-h-screen h-screen flex flex-col overflow-auto bg-gray-50">
       {/* Header */}
       <div className="px-8 py-4 bg-white border-b border-gray-100 flex-shrink-0">
         <div className="flex items-center justify-between">
@@ -121,7 +120,7 @@ const History = () => {
       ) : error ? (
   <ErrorState message="Failed to load history" onRetry={fetchData} />
 )       : (
-        <div className="flex-1 overflow-hidden p-5">
+        <div className="flex-1 overflow-auto p-5">
           <div className="grid grid-cols-3 gap-5 h-full min-h-0">
 
             {/* Left — Donut chart */}
