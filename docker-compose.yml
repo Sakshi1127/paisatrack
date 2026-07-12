@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+
+  # ── PostgreSQL Database ──────────────────────
+  db:
+    image: postgres:17-alpine
+    container_name: paisatrack-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paisatrack
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5433:5432"
+      # 5433 on your machine -> 5432 inside container
+      # Using 5433 to avoid conflict with local PostgreSQL
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # volume = persistent storage
+      # DB data survives even if container is stopped/deleted
+
+  # ── Node.js Backend ──────────────────────────
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: paisatrack-server
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      DATABASE_URL: postgresql://postgres:postgres123@db:5432/paisatrack
+      # "db" = container name of PostgreSQL service above
+      # Docker networking: containers talk to each other by service name
+      JWT_SECRET: paisatrack_super_secret_key_2026
+      NODE_ENV: production
+      ANTHROPIC_API_KEY: your_key_here
+      FRONTEND_URL: http://localhost
+    depends_on:
+      - db
+      # Wait for db container to start before starting server
+
+  # ── React Frontend ────────────────────────────
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: paisatrack-client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
+    # Named volume - managed by Docker
+    # Data persists between container restarts

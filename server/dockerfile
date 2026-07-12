@@ -1,0 +1,23 @@
+# what base image to use
+#alpine = lightweight linux distribution
+FROM node:18-alpine
+
+# Create working directory inside container
+workdir /app
+
+# Copy package files FIRST (before source code)
+# Why? Docker caches layers. If package.json hasn't changed,
+# it won't re-run npm install on every build. Faster builds.
+copy package.json ./
+
+# Install dependencies inside container
+RUN npm install
+
+# Copy source code into container
+copy . .
+
+#Tell Docker to expose port 5000 to the outside world
+EXPOSE 5000
+
+#command to run when container starts
+CMD ["node", "app.js"]
